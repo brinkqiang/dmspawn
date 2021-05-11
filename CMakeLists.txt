@@ -7,7 +7,7 @@ LIST(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 INCLUDE(cmake/ModuleImport.cmake)
 INCLUDE(cmake/ModuleCompileOptions.cmake)
 ModuleSetCompileOptions()
-
+ModuleSetWinCompilerFlags()
 find_package(Boost COMPONENTS coroutine REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 ExeImport("test" "${Boost_LIBRARIES}")

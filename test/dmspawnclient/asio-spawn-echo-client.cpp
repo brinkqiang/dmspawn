@@ -17,7 +17,7 @@ session_t::~session_t()
 void session_t::go()
 {
 	auto self(shared_from_this());
-	asio::spawn(socket.get_io_context(),
+	asio::spawn(socket.get_executor(),
 		[this, self](yield_context_t yield)
 	{
 		string message;
