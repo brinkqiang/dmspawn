@@ -13,10 +13,6 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/hex.hpp>
 
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <spdlog_easy.hpp>
-
 using namespace std;
 
 namespace asio = boost::asio;

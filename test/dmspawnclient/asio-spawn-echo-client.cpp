@@ -1,8 +1,6 @@
 ﻿//#include "pch.h"
 #include "asio-spawn-echo-client.h"
-
-#define INFO
-#define ERROR
+#include "dmlog.hpp"
 
 session_t::session_t(io_context_t &io_context)
 	: socket(io_context)
@@ -11,7 +9,7 @@ session_t::session_t(io_context_t &io_context)
 
 session_t::~session_t()
 {
-	INFO("log");
+	LOG_INFO("log");
 }
 
 void session_t::go()
@@ -23,17 +21,17 @@ void session_t::go()
 		string message;
 		while (std::getline(cin, message))
 		{
-			INFO("log", message);
+			LOG_INFO("{0}", message);
 			error_code_t ec;
 			auto size = socket.async_write_some(asio::buffer(message), yield[ec]);
 
 			if (ec)
 			{
-				INFO("log", ec.message());
+				LOG_INFO("{0}", ec.message());
 			}
 			else
 			{
-				INFO("log", "async_write_some:{0}", size);
+				LOG_INFO("async_write_some:{0}", size);
 
 				vector<char> buff(1024, '\0');
 
@@ -42,7 +40,7 @@ void session_t::go()
 					auto read_size = socket.async_read_some(asio::buffer(buff), yield[ec]);
 					if (ec)
 					{
-						ERROR("log", ec.message());
+						LOG_WARN("{0}", ec.message());
 						exit(1);
 					}
 					else
@@ -56,7 +54,7 @@ void session_t::go()
 				}
 
 				buffer.push_back('\0');
-				INFO("log", "async_read_some:{0}", buffer.data());
+				LOG_INFO("async_read_some:{0}", buffer.data());
 				buffer.clear();
 			}
 		}
@@ -78,12 +76,12 @@ int main()
 		socket.async_connect(endpoint_t(address_t::from_string("127.0.0.1"), 12500), yield[ec]);
 		if (ec)
 		{
-			ERROR("log", ec.message());
+			LOG_ERROR("{0}", ec.message());
 			exit(1);
 		}
 		else
 		{
-			INFO("log", "address:{0} port:{1}", session->address, session->port);
+			LOG_INFO("address:{0} port:{1}", session->address, session->port);
 			session->go();
 		}
 	});
