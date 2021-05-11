@@ -40,7 +40,7 @@ void session_t::go()
 					auto read_size = socket.async_read_some(asio::buffer(buff), yield[ec]);
 					if (ec)
 					{
-						LOG_WARN("{0}", ec.message());
+						LOG_ERROR("{0}", ec.message());
 						exit(1);
 					}
 					else
