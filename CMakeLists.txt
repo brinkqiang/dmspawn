@@ -8,6 +8,6 @@ INCLUDE(cmake/ModuleImport.cmake)
 INCLUDE(cmake/ModuleCompileOptions.cmake)
 ModuleSetCompileOptions()
 
-find_package(Boost REQUIRED COMPONENTS asio coroutine)
+find_package(Boost COMPONENTS coroutine REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 ExeImport("test" "${Boost_LIBRARIES}")
