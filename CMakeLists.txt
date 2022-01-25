@@ -11,4 +11,5 @@ ModuleSetWinCompilerFlags()
 
 find_package(Boost COMPONENTS coroutine REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
+ModuleInclude("dmlog" "thirdparty/dmlog")
 ExeImport("test" "${Boost_LIBRARIES}")
