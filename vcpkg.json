@@ -1,0 +1,10 @@
+{
+    "name": "vcpkg",
+    "version": "1.0.0",
+    "dependencies": [
+        {
+            "name": "boost",
+            "version>=": "1.80.0"
+        }
+    ]
+}
