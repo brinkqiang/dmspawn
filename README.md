@@ -26,6 +26,5 @@ dmspawn
 ```cpp
 ```
 ## Contacts
-[![Join the chat](https://badges.gitter.im/brinkqiang/dmspawn/Lobby.svg)](https://gitter.im/brinkqiang/dmspawn)
 
 ## Thanks
