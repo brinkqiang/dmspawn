@@ -30,15 +30,16 @@ using yield_context_t = asio::yield_context;
 class session_t : public std::enable_shared_from_this<session_t>
 {
 public:
-	session_t(io_context_t &io_context);
-	~session_t();
+    session_t(io_context_t& io_context);
+    ~session_t();
 
-	socket_t socket;
+    socket_t socket;
 
-	void go();
+    void go();
 
+    void add();
 private:
-
+    std::atomic_int64_t count;
 };
 
 void echo(shared_ptr<session_t> session, yield_context_t& yield);
@@ -46,17 +47,17 @@ void echo(shared_ptr<session_t> session, yield_context_t& yield);
 template<typename Range>
 std::string to_hex(Range range)
 {
-	using namespace std;
-	string hex;
-	boost::algorithm::hex(begin(range), end(range), back_inserter(hex));
-	return std::move(hex);
+    using namespace std;
+    string hex;
+    boost::algorithm::hex(begin(range), end(range), back_inserter(hex));
+    return std::move(hex);
 }
 
 template<typename Range>
 std::string to_hex(Range range, std::size_t size)
 {
-	using namespace std;
-	string hex;
-	boost::algorithm::hex(begin(range), begin(range) + size, back_inserter(hex));
-	return std::move(hex);
+    using namespace std;
+    string hex;
+    boost::algorithm::hex(begin(range), begin(range) + size, back_inserter(hex));
+    return std::move(hex);
 }

@@ -18,8 +18,8 @@ void session_t::go()
     asio::spawn(socket.get_executor(),
         [this, self](yield_context_t yield)
     {
-        string message;
-        while (std::getline(cin, message))
+        string message = "test@123456789";
+        while (true)
         {
             LOG_INFO("{0}", message);
             error_code_t ec;
