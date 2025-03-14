@@ -74,7 +74,13 @@ int main()
             }
             else
             {
-                auto remote_endpoint = socket.remote_endpoint();
+                error_code_t ec;
+                auto remote_endpoint = socket.remote_endpoint(ec);
+                if (ec) {
+                    LOG_INFO("获取客户端地址失败: {0}", ec.message());
+                    socket.close(ec);
+                    continue;
+                }
                 auto address = remote_endpoint.address().to_string();
                 auto port = remote_endpoint.port();
                 LOG_INFO("address:{0} port:{1}", address, port);
