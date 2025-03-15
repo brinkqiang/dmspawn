@@ -1,6 +1,6 @@
-﻿
-#include "asio-spawn-echo-server.h"
+﻿#include "asio-spawn-echo-server.h"
 #include "dmlog.h"
+
 session_t::session_t(io_context_t& io_context)
     : socket(io_context)
 {
@@ -78,16 +78,15 @@ int main()
             {
                 error_code_t ec;
                 auto remote_endpoint = socket.remote_endpoint(ec);
-            if (ec) {
-                LOG_INFO("Failed to get client endpoint: {0}", ec.message());
-                socket.close(ec);
-                continue;
-            }
-            auto address = remote_endpoint.address().to_string();
-            auto port = remote_endpoint.port();
-            LOG_INFO("New connection from {0}:{1}", address, port);
-            LOG_INFO("Connection established at {0}", 
-                std::chrono::system_clock::now());
+                if (ec) {
+                    LOG_INFO("Failed to get client endpoint: {0}", ec.message());
+                    socket.close(ec);
+                    continue;
+                }
+                auto address = remote_endpoint.address().to_string();
+                auto port = remote_endpoint.port();
+                LOG_INFO("New connection from {0}:{1}", address, (int)port);
+                LOG_INFO("Connection established");
 
                 session->go();
             }
