@@ -1,4 +1,4 @@
-﻿//#include "pch.h"
+﻿﻿
 #include "asio-spawn-echo-client.h"
 #include "dmlog.h"
 
@@ -27,36 +27,51 @@ void session_t::go()
 
             if (ec)
             {
-                LOG_INFO("{0}", ec.message());
+                LOG_INFO("Write error: {0}", ec.message());
+                break;
             }
-            else
+            
+            LOG_INFO("async_write_some:{0}", size);
+
+            vector<char> buff(1024, '\0');
+            bool read_complete = false;
+
+            while (!read_complete)
             {
-                LOG_INFO("async_write_some:{0}", size);
-
-                vector<char> buff(1024, '\0');
-
-                while (true)
+                auto read_size = socket.async_read_some(asio::buffer(buff), yield[ec]);
+                if (ec)
                 {
-                    auto read_size = socket.async_read_some(asio::buffer(buff), yield[ec]);
-                    if (ec)
+                    if (ec == asio::error::eof || ec == asio::error::connection_reset)
                     {
-                        LOG_ERROR("{0}", ec.message());
-                        exit(1);
+                        LOG_INFO("Connection closed by server");
                     }
                     else
                     {
-                        copy_n(buff.begin(), read_size, back_inserter(buffer));
-                        if (read_size < buff.size())
-                        {
-                            break;
-                        }
+                        LOG_ERROR("Read error: {0}", ec.message());
+                    }
+                    read_complete = true;
+                }
+                else
+                {
+                    copy_n(buff.begin(), read_size, back_inserter(buffer));
+                    if (read_size < buff.size())
+                    {
+                        read_complete = true;
                     }
                 }
+            }
 
+            if (!buffer.empty())
+            {
                 buffer.push_back('\0');
                 LOG_INFO("async_read_some:{0}", buffer.data());
                 buffer.clear();
             }
+
+            // Add delay between iterations
+            asio::steady_timer timer(socket.get_executor());
+            timer.expires_after(std::chrono::milliseconds(500));
+            timer.async_wait(yield[ec]);
         }
     });
 }
@@ -73,16 +88,24 @@ int main()
         auto session = make_shared<session_t>(io_context);
         auto& socket = session->socket;
 
-        socket.async_connect(endpoint_t(address_t::from_string("127.0.0.1"), 12500), yield[ec]);
-        if (ec)
+        while (true)
         {
-            LOG_ERROR("{0}", ec.message());
-            exit(1);
-        }
-        else
-        {
-            LOG_INFO("address:{0} port:{1}", session->address, session->port);
-            session->go();
+            socket.async_connect(endpoint_t(address_t::from_string("127.0.0.1"), 12500), yield[ec]);
+            if (ec)
+            {
+                LOG_ERROR("Connection error: {0}", ec.message());
+                
+                // Wait before retrying
+                asio::steady_timer timer(socket.get_executor());
+                timer.expires_after(std::chrono::seconds(5));
+                timer.async_wait(yield[ec]);
+            }
+            else
+            {
+                LOG_INFO("Connected to server");
+                session->go();
+                break;
+            }
         }
     });
 

@@ -1,4 +1,4 @@
-﻿//#include "pch.h"
+﻿
 #include "asio-spawn-echo-server.h"
 #include "dmlog.h"
 session_t::session_t(io_context_t& io_context)
@@ -8,7 +8,7 @@ session_t::session_t(io_context_t& io_context)
 
 session_t::~session_t()
 {
-    LOG_INFO("log");
+    LOG_INFO("Session destroyed");
 }
 
 void echo(shared_ptr<session_t> session, yield_context_t& yield)
@@ -19,23 +19,25 @@ void echo(shared_ptr<session_t> session, yield_context_t& yield)
     auto size = socket.async_read_some(asio::buffer(buffer), yield[ec]);
     if (ec)
     {
-        LOG_INFO("{0}", ec.message());
+        LOG_INFO("Read error: {0}", ec.message());
+        LOG_INFO("Connection closed");
         return;
     }
     else
     {
-        LOG_INFO("async_read_some:{0}", size);
-        LOG_INFO("hex:{0}", to_hex(buffer, size));
-        LOG_INFO("{0}", buffer.data());
+        LOG_INFO("Received {0} bytes from client", size);
+        LOG_INFO("Hex data: {0}", to_hex(buffer, size));
+        LOG_INFO("Text data: {0}", buffer.data());
         auto write_size = socket.async_write_some(asio::buffer(buffer.data(), size), yield[ec]);
         if (ec)
         {
-            LOG_INFO("{0}", ec.message());
+            LOG_INFO("Write error: {0}", ec.message());
+            LOG_INFO("Connection closed");
             return;
         }
         else
         {
-            LOG_INFO("async_read_some:{0}", write_size);
+            LOG_INFO("Sent {0} bytes to client", write_size);
             echo(session, yield);
         }
     }
@@ -76,14 +78,16 @@ int main()
             {
                 error_code_t ec;
                 auto remote_endpoint = socket.remote_endpoint(ec);
-                if (ec) {
-                    LOG_INFO("获取客户端地址失败: {0}", ec.message());
-                    socket.close(ec);
-                    continue;
-                }
-                auto address = remote_endpoint.address().to_string();
-                auto port = remote_endpoint.port();
-                LOG_INFO("address:{0} port:{1}", address, port);
+            if (ec) {
+                LOG_INFO("Failed to get client endpoint: {0}", ec.message());
+                socket.close(ec);
+                continue;
+            }
+            auto address = remote_endpoint.address().to_string();
+            auto port = remote_endpoint.port();
+            LOG_INFO("New connection from {0}:{1}", address, port);
+            LOG_INFO("Connection established at {0}", 
+                std::chrono::system_clock::now());
 
                 session->go();
             }
