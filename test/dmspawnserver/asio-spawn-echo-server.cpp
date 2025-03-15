@@ -1,4 +1,5 @@
-﻿#include "asio-spawn-echo-server.h"
+﻿
+#include "asio-spawn-echo-server.h"
 #include "dmlog.h"
 
 session_t::session_t(io_context_t& io_context)
@@ -26,7 +27,8 @@ void echo(shared_ptr<session_t> session, yield_context_t& yield)
     else
     {
         LOG_INFO("Received {0} bytes from client", size);
-        LOG_INFO("Hex data: {0}", to_hex(buffer, size));
+
+        LOG_INFO("Hex data: {0}", fmt::format("[{:02x}]", std::string(buffer, size)));
         LOG_INFO("Text data: {0}", buffer.data());
         auto write_size = socket.async_write_some(asio::buffer(buffer.data(), size), yield[ec]);
         if (ec)
