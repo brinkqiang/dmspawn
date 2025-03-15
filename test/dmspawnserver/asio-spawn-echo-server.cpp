@@ -1,6 +1,6 @@
-﻿
 #include "asio-spawn-echo-server.h"
 #include "dmlog.h"
+#include "dmstrtk.hpp"
 
 session_t::session_t(io_context_t& io_context)
     : socket(io_context)
@@ -28,7 +28,7 @@ void echo(shared_ptr<session_t> session, yield_context_t& yield)
     {
         LOG_INFO("Received {0} bytes from client", size);
 
-        LOG_INFO("Hex data: {0}", fmt::format("[{:02x}]", std::string(buffer, size)));
+        LOG_INFO("Hex data: {0}", strtk::convert_bin_to_hex(std::string(&buffer[0], size)));
         LOG_INFO("Text data: {0}", buffer.data());
         auto write_size = socket.async_write_some(asio::buffer(buffer.data(), size), yield[ec]);
         if (ec)
